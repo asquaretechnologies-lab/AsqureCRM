@@ -1,0 +1,14 @@
+{
+  "name": "asqurecrm",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Internal CRM for POS Software Business",
+  "scripts": {
+    "dev:backend": "npm run dev --prefix backend",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "build:backend": "npm run build --prefix backend",
+    "build:frontend": "npm run build --prefix frontend",
+    "db:migrate": "npm run db:migrate --prefix backend",
+    "db:seed": "npm run db:seed --prefix backend"
+  }
+}
