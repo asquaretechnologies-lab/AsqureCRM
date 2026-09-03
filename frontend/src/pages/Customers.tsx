@@ -51,6 +51,7 @@ export const CustomersPage: React.FC = () => {
     email: '',
     taxNumber: '',
     addressLine1: '',
+    addressLine2: '',
     city: '',
     state: '',
     salesUserId: '',
@@ -151,7 +152,8 @@ export const CustomersPage: React.FC = () => {
       phone: cust.phone || '',
       email: cust.email || '',
       taxNumber: '',
-      addressLine1: '',
+      addressLine1: cust.addressLine1 || '',
+      addressLine2: cust.addressLine2 || '',
       city: cust.city || '',
       state: cust.state || '',
       salesUserId: cust.salesUser?.id || '',
@@ -174,6 +176,7 @@ export const CustomersPage: React.FC = () => {
       email: '',
       taxNumber: '',
       addressLine1: '',
+      addressLine2: '',
       city: '',
       state: '',
       salesUserId: salesUsers.length > 0 ? salesUsers[0].id : '',
@@ -564,6 +567,29 @@ export const CustomersPage: React.FC = () => {
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     placeholder="info@apexretail.com"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 focus:bg-white focus:border-brand-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Address Line 1</label>
+                  <input
+                    type="text"
+                    value={formData.addressLine1}
+                    onChange={(e) => setFormData({ ...formData, addressLine1: e.target.value })}
+                    placeholder="Building / Street Address"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 focus:bg-white focus:border-brand-500 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Address Line 2</label>
+                  <input
+                    type="text"
+                    value={formData.addressLine2}
+                    onChange={(e) => setFormData({ ...formData, addressLine2: e.target.value })}
+                    placeholder="Suite / Area / Landmark"
                     className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 focus:bg-white focus:border-brand-500 focus:outline-none"
                   />
                 </div>

@@ -43,6 +43,8 @@ export interface CustomerItem {
   businessType?: string;
   phone?: string;
   email?: string;
+  addressLine1?: string;
+  addressLine2?: string;
   city?: string;
   state?: string;
   status: 'PROSPECT' | 'ACTIVE' | 'INACTIVE' | 'SUSPENDED' | 'CLOSED';
@@ -894,6 +896,30 @@ export const api = {
 
   deleteCompanyAsset: async (id: string) => {
     const res = await axios.delete(`/api/company-accounts/assets/${id}`);
+    return res.data;
+  },
+
+  // Mobile POS
+  registerMobilePos: async (data: {
+    businessName: string;
+    displayName?: string;
+    contactName?: string;
+    phone?: string;
+    email?: string;
+    taxNumber?: string;
+    addressLine1?: string;
+    addressLine2?: string;
+    city?: string;
+    state?: string;
+    postalCode?: string;
+    outletName?: string;
+    productId?: string;
+    licenseType?: string;
+    validityDays?: number;
+    terminalCount?: number;
+    deviceInfo?: string;
+  }) => {
+    const res = await axios.post('/api/mobile-pos/register', data);
     return res.data;
   },
 };

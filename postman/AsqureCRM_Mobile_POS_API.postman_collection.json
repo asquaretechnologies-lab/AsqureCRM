@@ -1,0 +1,170 @@
+{
+	"info": {
+		"_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+		"name": "AsqureCRM - Mobile POS Offline Registration & Licensing API",
+		"description": "Postman Collection for registering offline Mobile POS devices, creating Customer and Outlet records, issuing serial License Keys, and validating license keys.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:5001",
+			"type": "string"
+		},
+		{
+			"key": "licenseKey",
+			"value": "AQPOS-9F8A-7B2C-4E1D-5A6B",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Mobile POS",
+			"item": [
+				{
+					"name": "Register Mobile POS Device & Issue License",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"businessName\": \"Apex Supermarket Pvt Ltd\",\n  \"displayName\": \"Apex Supermarket\",\n  \"contactName\": \"Rahul Sharma\",\n  \"phone\": \"+91 9876543210\",\n  \"email\": \"contact@apexretail.com\",\n  \"taxNumber\": \"29ABCDE1234F1ZH\",\n  \"addressLine1\": \"Plot No 42, Commercial Complex\",\n  \"addressLine2\": \"MG Road, Indiranagar\",\n  \"city\": \"Bengaluru\",\n  \"state\": \"Karnataka\",\n  \"country\": \"India\",\n  \"postalCode\": \"560038\",\n  \"outletName\": \"Indiranagar Branch\",\n  \"licenseType\": \"SUBSCRIPTION\",\n  \"validityDays\": 365,\n  \"terminalCount\": 1,\n  \"deviceInfo\": \"Sunmi V2 PRO Mobile POS - S/N POS99812\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/mobile-pos/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"mobile-pos",
+								"register"
+							]
+						},
+						"description": "Registers a Mobile POS device along with its Customer and Outlet, and issues a 1-year active serial License Key."
+					},
+					"response": [
+						{
+							"name": "Success Response - License Key Returned",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"businessName\": \"Apex Supermarket Pvt Ltd\",\n  \"phone\": \"+91 9876543210\",\n  \"addressLine1\": \"Plot No 42, Commercial Complex\",\n  \"addressLine2\": \"MG Road, Indiranagar\",\n  \"city\": \"Bengaluru\",\n  \"state\": \"Karnataka\",\n  \"outletName\": \"Indiranagar Branch\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/mobile-pos/register",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"mobile-pos",
+										"register"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Mobile POS registered successfully and serial license key generated\",\n  \"data\": {\n    \"licenseKey\": \"AQPOS-9F8A-7B2C-4E1D-5A6B\",\n    \"licenseNumber\": \"LIC-2026-8812\",\n    \"licenseType\": \"SUBSCRIPTION\",\n    \"status\": \"ACTIVE\",\n    \"startDate\": \"2026-09-03T00:00:00.000Z\",\n    \"expiryDate\": \"2027-09-03T00:00:00.000Z\",\n    \"terminalCount\": 1,\n    \"customer\": {\n      \"id\": \"c1234567-89ab-cdef-0123-456789abcdef\",\n      \"customerCode\": \"CUST-MB-1042\",\n      \"businessName\": \"Apex Supermarket Pvt Ltd\",\n      \"displayName\": \"Apex Supermarket\",\n      \"phone\": \"+91 9876543210\",\n      \"email\": \"contact@apexretail.com\"\n    },\n    \"outlet\": {\n      \"id\": \"o1234567-89ab-cdef-0123-456789abcdef\",\n      \"outletCode\": \"OUT-MB-3012\",\n      \"outletName\": \"Indiranagar Branch\"\n    },\n    \"installation\": {\n      \"id\": \"i1234567-89ab-cdef-0123-456789abcdef\",\n      \"installationNumber\": \"INST-MB-9014\"\n    },\n    \"product\": {\n      \"id\": \"p1234567-89ab-cdef-0123-456789abcdef\",\n      \"name\": \"Asqure Mobile POS\",\n      \"productCode\": \"PROD-MBPOS\"\n    }\n  }\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Licenses",
+			"item": [
+				{
+					"name": "Validate License Key",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"licenseKey\": \"{{licenseKey}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/licenses/validate",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"licenses",
+								"validate"
+							]
+						},
+						"description": "Validates a serial license key for offline Mobile POS verification."
+					},
+					"response": [
+						{
+							"name": "Valid License Response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"licenseKey\": \"AQPOS-9F8A-7B2C-4E1D-5A6B\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/licenses/validate",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"licenses",
+										"validate"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"valid\": true,\n  \"data\": {\n    \"licenseNumber\": \"LIC-2026-8812\",\n    \"licenseKey\": \"AQPOS-9F8A-7B2C-4E1D-5A6B\",\n    \"customerName\": \"Apex Supermarket Pvt Ltd\",\n    \"productName\": \"Asqure Mobile POS\",\n    \"maxTerminals\": 1,\n    \"expiryDate\": \"2027-09-03T00:00:00.000Z\",\n    \"daysRemaining\": 365,\n    \"status\": \"ACTIVE\"\n  }\n}"
+						}
+					]
+				}
+			]
+		}
+	]
+}

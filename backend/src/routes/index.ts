@@ -16,6 +16,7 @@ import dashboardRoutes from './dashboardRoutes';
 import reportRoutes from './reportRoutes';
 import notificationRoutes from './notificationRoutes';
 import companyAccountsRoutes from './companyAccountsRoutes';
+import mobilePosRoutes from './mobilePosRoutes';
 
 const router = Router();
 
@@ -46,5 +47,6 @@ router.use('/dashboard', dashboardRoutes);
 router.use('/reports', reportRoutes);
 router.use('/notifications', notificationRoutes);
 router.use('/company-accounts', companyAccountsRoutes);
+router.use('/mobile-pos', mobilePosRoutes);
 
 export default router;
