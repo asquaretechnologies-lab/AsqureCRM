@@ -521,8 +521,25 @@ export async function getBalanceSheet(req: AuthRequest, res: Response, next: Nex
     // 3. Equity & Retained Earnings
     const pnlRes = await getProfitAndLossRaw();
     const netProfit = pnlRes.netProfit;
-    const ownerCapital = 100000; // Default seed capital
+
+    // Fetch Owner / Share Capital Account (3010) balance from actual Journal Entries
+    const capitalAccount = await prisma.account.findUnique({
+      where: { accountCode: '3010' },
+      include: {
+        journalLines: { select: { debit: true, credit: true } },
+      },
+    });
+
+    let ownerCapital = 0;
+    if (capitalAccount) {
+      ownerCapital = capitalAccount.journalLines.reduce(
+        (sum, l) => sum + Number(l.credit) - Number(l.debit),
+        0
+      );
+    }
+
     const totalEquity = ownerCapital + netProfit;
+    const isBalanced = Math.abs(totalAssets - (totalLiabilities + totalEquity)) < 0.01;
 
     return res.json({
       success: true,
@@ -543,9 +560,10 @@ export async function getBalanceSheet(req: AuthRequest, res: Response, next: Nex
           retainedEarnings: netProfit,
           totalEquity,
         },
-        isBalanced: true,
+        isBalanced,
       },
     });
+
   } catch (err) {
     next(err);
   }

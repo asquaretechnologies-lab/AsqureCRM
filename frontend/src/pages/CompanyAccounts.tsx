@@ -738,11 +738,19 @@ export const CompanyAccounts: React.FC = () => {
                   <h2 className="text-lg font-bold text-slate-900">Company Balance Sheet</h2>
                   <p className="text-xs text-slate-500">Assets = Liabilities + Equity</p>
                 </div>
-                <div className="flex items-center gap-2 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200 text-emerald-700 text-xs font-semibold">
-                  <CheckCircle2 className="h-4 w-4" />
-                  Balanced Statement
-                </div>
+                {balanceSheet.isBalanced ? (
+                  <div className="flex items-center gap-2 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200 text-emerald-700 text-xs font-semibold">
+                    <CheckCircle2 className="h-4 w-4" />
+                    Balanced Statement
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-200 text-amber-700 text-xs font-semibold">
+                    <Scale className="h-4 w-4 text-amber-600" />
+                    Statement Unbalanced
+                  </div>
+                )}
               </div>
+
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Assets */}
