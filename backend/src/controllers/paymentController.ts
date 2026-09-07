@@ -179,3 +179,79 @@ export async function createPayment(req: AuthRequest, res: Response, next: NextF
     next(err);
   }
 }
+
+export async function deletePayment(req: AuthRequest, res: Response, next: NextFunction) {
+  try {
+    const { id } = req.params;
+
+    const payment = await prisma.payment.findUnique({
+      where: { id },
+      include: { invoice: true },
+    });
+
+    if (!payment) {
+      return res.status(404).json({
+        success: false,
+        error: { code: 'NOT_FOUND', message: 'Payment receipt not found' },
+      });
+    }
+
+    const invoice = payment.invoice;
+    const paymentAmount = Number(payment.amount);
+
+    const updateOps: any[] = [
+      prisma.payment.delete({ where: { id } }),
+    ];
+
+    if (invoice) {
+      const currentPaid = Number(invoice.amountPaid);
+      const newAmountPaid = Math.max(0, currentPaid - paymentAmount);
+      const totalAmount = Number(invoice.totalAmount);
+      const newBalanceAmount = Math.min(totalAmount, totalAmount - newAmountPaid);
+
+      let newStatus = invoice.status;
+      if (newBalanceAmount >= totalAmount) {
+        newStatus = invoice.dueDate && new Date(invoice.dueDate) < new Date() ? 'OVERDUE' : 'UNPAID';
+      } else if (newAmountPaid > 0) {
+        newStatus = 'PARTIAL';
+      } else {
+        newStatus = 'UNPAID';
+      }
+
+      updateOps.push(
+        prisma.invoice.update({
+          where: { id: invoice.id },
+          data: {
+            amountPaid: newAmountPaid,
+            balanceAmount: newBalanceAmount,
+            status: newStatus,
+          },
+        })
+      );
+    }
+
+    await prisma.$transaction(updateOps);
+
+    await prisma.auditLog.create({
+      data: {
+        userId: req.user?.id,
+        entityType: 'Payment',
+        entityId: id,
+        action: 'DELETE_PAYMENT',
+        oldValues: {
+          receiptNumber: payment.receiptNumber,
+          amount: paymentAmount,
+          invoiceId: payment.invoiceId,
+        },
+      },
+    });
+
+    return res.json({
+      success: true,
+      message: `Payment receipt ${payment.receiptNumber} deleted and invoice balance updated successfully`,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+

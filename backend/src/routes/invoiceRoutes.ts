@@ -4,6 +4,7 @@ import {
   getInvoiceById,
   createInvoice,
   getOutstanding,
+  deleteInvoice,
 } from '../controllers/invoiceController';
 import { authenticateToken, requirePermission } from '../middleware/auth';
 
@@ -15,5 +16,7 @@ router.get('/', requirePermission('invoices', 'VIEW'), getInvoices);
 router.get('/outstanding', requirePermission('invoices', 'VIEW'), getOutstanding);
 router.get('/:id', requirePermission('invoices', 'VIEW'), getInvoiceById);
 router.post('/', requirePermission('invoices', 'CREATE'), createInvoice);
+router.delete('/:id', deleteInvoice);
 
 export default router;
+

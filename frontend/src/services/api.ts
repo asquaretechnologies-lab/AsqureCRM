@@ -662,6 +662,11 @@ export const api = {
     return res.data;
   },
 
+  deleteInvoice: async (id: string) => {
+    const res = await axios.delete(`/api/invoices/${id}`);
+    return res.data;
+  },
+
   // Payments
   getPayments: async (params?: { page?: number; limit?: number; search?: string; customerId?: string }) => {
     const res = await axios.get('/api/payments', { params });
@@ -670,6 +675,11 @@ export const api = {
 
   createPayment: async (data: { invoiceId: string; customerId: string; amount: number; paymentMethod: string; referenceNumber?: string; bankName?: string; notes?: string }) => {
     const res = await axios.post('/api/payments', data);
+    return res.data;
+  },
+
+  deletePayment: async (id: string) => {
+    const res = await axios.delete(`/api/payments/${id}`);
     return res.data;
   },
 
@@ -861,6 +871,21 @@ export const api = {
 
   getChartOfAccounts: async () => {
     const res = await axios.get('/api/company-accounts/chart-of-accounts');
+    return res.data;
+  },
+
+  createAccount: async (data: {
+    accountCode: string;
+    accountName: string;
+    accountType: 'ASSET' | 'LIABILITY' | 'EQUITY' | 'REVENUE' | 'EXPENSE';
+    subCategory?: string;
+  }) => {
+    const res = await axios.post('/api/company-accounts/chart-of-accounts', data);
+    return res.data;
+  },
+
+  deleteAccount: async (id: string) => {
+    const res = await axios.delete(`/api/company-accounts/chart-of-accounts/${id}`);
     return res.data;
   },
 

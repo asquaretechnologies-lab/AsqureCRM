@@ -193,6 +193,20 @@ export const InvoicesPage: React.FC = () => {
     }
   };
 
+  const handleDeleteInvoice = async (id: string, invoiceNumber: string) => {
+    if (!window.confirm(`Are you sure you want to delete invoice ${invoiceNumber}? This will also delete any associated payment receipts.`)) return;
+    try {
+      const res = await api.deleteInvoice(id);
+      if (res.success) {
+        setFormSuccess(`Invoice ${invoiceNumber} deleted successfully!`);
+        fetchInvoices(pagination.page);
+      }
+    } catch (err: any) {
+      console.error('Failed to delete invoice:', err);
+      alert(err.response?.data?.error?.message || 'Failed to delete invoice');
+    }
+  };
+
   // Calculations for create modal
   const calculatedSubtotal = invoiceForm.items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
   const calculatedTax = invoiceForm.items.reduce((sum, item) => sum + (item.quantity * item.unitPrice) * (item.tax / 100), 0);
@@ -410,6 +424,13 @@ export const InvoicesPage: React.FC = () => {
                           <CreditCard size={16} />
                         </button>
                       )}
+                      <button
+                        onClick={() => handleDeleteInvoice(inv.id, inv.invoiceNumber)}
+                        title="Delete Invoice"
+                        className="p-1.5 text-slate-600 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
+                      >
+                        <Trash2 size={16} />
+                      </button>
                     </td>
                   </tr>
                 ))

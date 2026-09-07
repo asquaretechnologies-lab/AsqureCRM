@@ -16,6 +16,7 @@ import {
   CheckCircle2,
   DollarSign,
   Download,
+  Trash2,
 } from 'lucide-react';
 
 export const PaymentsPage: React.FC = () => {
@@ -119,6 +120,20 @@ export const PaymentsPage: React.FC = () => {
       setFormError(err.response?.data?.error?.message || 'Failed to record payment');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleDeletePayment = async (id: string, receiptNumber: string) => {
+    if (!window.confirm(`Are you sure you want to delete payment receipt ${receiptNumber}? The invoice balance will be updated.`)) return;
+    try {
+      const res = await api.deletePayment(id);
+      if (res.success) {
+        setFormSuccess(res.message);
+        fetchPayments(pagination.page);
+      }
+    } catch (err: any) {
+      console.error('Failed to delete payment receipt:', err);
+      alert(err.response?.data?.error?.message || 'Failed to delete payment receipt');
     }
   };
 
@@ -241,18 +256,19 @@ export const PaymentsPage: React.FC = () => {
                 <th className="px-5 py-3">Reference #</th>
                 <th className="px-5 py-3 text-right">Amount Collected</th>
                 <th className="px-5 py-3 text-right">Collected By</th>
+                <th className="px-5 py-3 text-center">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {isLoading ? (
                 <tr>
-                  <td colSpan={8} className="px-5 py-12 text-center text-slate-500">
+                  <td colSpan={9} className="px-5 py-12 text-center text-slate-500">
                     <Loader2 className="animate-spin inline-block mr-2" size={20} /> Loading receipts...
                   </td>
                 </tr>
               ) : payments.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-5 py-12 text-center text-slate-500">
+                  <td colSpan={9} className="px-5 py-12 text-center text-slate-500">
                     <p className="font-semibold text-slate-700">No payment receipts found</p>
                   </td>
                 </tr>
@@ -286,6 +302,15 @@ export const PaymentsPage: React.FC = () => {
                     </td>
                     <td className="px-5 py-3.5 text-right text-xs text-slate-500 font-medium">
                       {p.collectedBy || 'Finance Desk'}
+                    </td>
+                    <td className="px-5 py-3.5 text-center">
+                      <button
+                        onClick={() => handleDeletePayment(p.id, p.receiptNumber)}
+                        title="Delete Payment Receipt"
+                        className="p-1.5 text-slate-600 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
+                      >
+                        <Trash2 size={16} />
+                      </button>
                     </td>
                   </tr>
                 ))

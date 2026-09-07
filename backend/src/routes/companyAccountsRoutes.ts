@@ -7,6 +7,8 @@ import {
   getTransactions,
   deleteTransaction,
   getChartOfAccounts,
+  createAccount,
+  deleteAccount,
   getTrialBalance,
   getProfitAndLoss,
   getBalanceSheet,
@@ -27,7 +29,10 @@ router.get('/transactions', getTransactions);
 router.delete('/transactions/:id', deleteTransaction);
 
 router.get('/chart-of-accounts', getChartOfAccounts);
+router.post('/chart-of-accounts', createAccount);
+router.delete('/chart-of-accounts/:id', deleteAccount);
 router.get('/trial-balance', getTrialBalance);
+
 router.get('/profit-and-loss', getProfitAndLoss);
 router.get('/balance-sheet', getBalanceSheet);
 router.get('/general-ledger', getGeneralLedger);

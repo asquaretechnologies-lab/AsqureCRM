@@ -57,6 +57,20 @@ export const CompanyAccounts: React.FC = () => {
   const [showIncomeModal, setShowIncomeModal] = useState(false);
   const [showAssetModal, setShowAssetModal] = useState(false);
   const [showJournalModal, setShowJournalModal] = useState(false);
+  const [showAccountModal, setShowAccountModal] = useState(false);
+
+  // Form Inputs
+  const [accountForm, setAccountForm] = useState<{
+    accountCode: string;
+    accountName: string;
+    accountType: 'ASSET' | 'LIABILITY' | 'EQUITY' | 'REVENUE' | 'EXPENSE';
+    subCategory: string;
+  }>({
+    accountCode: '',
+    accountName: '',
+    accountType: 'EXPENSE',
+    subCategory: 'OPERATING_EXPENSE',
+  });
 
   // Form Inputs
   const [journalForm, setJournalForm] = useState<{
@@ -294,6 +308,34 @@ export const CompanyAccounts: React.FC = () => {
       fetchAllData();
     } catch (err) {
       console.error('Failed to delete asset:', err);
+    }
+  };
+
+  const handleCreateAccount = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const res = await api.createAccount(accountForm);
+      if (res.success) {
+        setShowAccountModal(false);
+        setAccountForm({ accountCode: '', accountName: '', accountType: 'EXPENSE', subCategory: 'OPERATING_EXPENSE' });
+        fetchAllData();
+      }
+    } catch (err: any) {
+      console.error('Failed to create account:', err);
+      alert(err.response?.data?.error?.message || 'Failed to create account');
+    }
+  };
+
+  const handleDeleteAccount = async (id: string, name: string) => {
+    if (!window.confirm(`Are you sure you want to delete account "${name}"?`)) return;
+    try {
+      const res = await api.deleteAccount(id);
+      if (res.success) {
+        fetchAllData();
+      }
+    } catch (err: any) {
+      console.error('Failed to delete account:', err);
+      alert(err.response?.data?.error?.message || 'Failed to delete account');
     }
   };
 
@@ -971,6 +1013,13 @@ export const CompanyAccounts: React.FC = () => {
               <h2 className="text-lg font-bold text-slate-900">Chart of Accounts (COA)</h2>
               <p className="text-xs text-slate-500">Master ledger accounts for Assets, Liabilities, Equity, Revenues & Expenses</p>
             </div>
+            <button
+              onClick={() => setShowAccountModal(true)}
+              className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-brand-600 hover:bg-brand-700 text-white font-medium text-sm transition shadow-sm"
+            >
+              <Plus className="h-4 w-4" />
+              Add New Account
+            </button>
           </div>
 
           <div className="overflow-x-auto">
@@ -984,6 +1033,7 @@ export const CompanyAccounts: React.FC = () => {
                   <th className="py-3 px-4 text-right">Debit Total</th>
                   <th className="py-3 px-4 text-right">Credit Total</th>
                   <th className="py-3 px-4 text-right">Current Balance</th>
+                  <th className="py-3 px-4 text-center">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -1000,6 +1050,19 @@ export const CompanyAccounts: React.FC = () => {
                     <td className="py-2.5 px-4 text-right text-slate-500">₹{acc.totalDebit.toLocaleString()}</td>
                     <td className="py-2.5 px-4 text-right text-slate-500">₹{acc.totalCredit.toLocaleString()}</td>
                     <td className="py-2.5 px-4 text-right font-bold text-brand-700">₹{acc.balance.toLocaleString()}</td>
+                    <td className="py-2.5 px-4 text-center">
+                      {!acc.isSystem ? (
+                        <button
+                          onClick={() => handleDeleteAccount(acc.id, acc.accountName)}
+                          className="p-1 text-slate-400 hover:text-rose-600 transition"
+                          title="Delete custom account"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      ) : (
+                        <span className="text-[10px] uppercase font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">System</span>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -1498,6 +1561,94 @@ export const CompanyAccounts: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Add New Account Modal */}
+      {showAccountModal && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl border border-slate-200 max-w-md w-full overflow-hidden">
+            <div className="flex items-center justify-between p-4 border-b bg-slate-50">
+              <h3 className="font-bold text-slate-900 flex items-center gap-2 text-base">
+                <Plus className="h-5 w-5 text-brand-600" />
+                Add New Chart of Account
+              </h3>
+              <button onClick={() => setShowAccountModal(false)} className="text-slate-400 hover:text-slate-600">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateAccount} className="p-5 space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Account Code *</label>
+                <input
+                  type="text"
+                  placeholder="e.g. 5060, 1030, 4040"
+                  value={accountForm.accountCode}
+                  onChange={(e) => setAccountForm({ ...accountForm, accountCode: e.target.value })}
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-brand-500 font-mono"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Account Name *</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Server & Hosting Charges"
+                  value={accountForm.accountName}
+                  onChange={(e) => setAccountForm({ ...accountForm, accountName: e.target.value })}
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-brand-500"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Account Type *</label>
+                  <select
+                    value={accountForm.accountType}
+                    onChange={(e) => setAccountForm({ ...accountForm, accountType: e.target.value as any })}
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-brand-500"
+                  >
+                    <option value="EXPENSE">EXPENSE</option>
+                    <option value="REVENUE">REVENUE</option>
+                    <option value="ASSET">ASSET</option>
+                    <option value="LIABILITY">LIABILITY</option>
+                    <option value="EQUITY">EQUITY</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Category / Sub-type</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. OPERATING_EXPENSE"
+                    value={accountForm.subCategory}
+                    onChange={(e) => setAccountForm({ ...accountForm, subCategory: e.target.value })}
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-brand-500"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-3 border-t">
+                <button
+                  type="button"
+                  onClick={() => setShowAccountModal(false)}
+                  className="px-4 py-2 text-sm text-slate-600 hover:text-slate-800 font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-sm font-semibold transition"
+                >
+                  Create Account
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
+

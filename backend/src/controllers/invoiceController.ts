@@ -329,3 +329,52 @@ export async function getOutstanding(req: Request, res: Response, next: NextFunc
     next(err);
   }
 }
+
+export async function deleteInvoice(req: AuthRequest, res: Response, next: NextFunction) {
+  try {
+    const { id } = req.params;
+
+    const invoice = await prisma.invoice.findUnique({
+      where: { id },
+      include: {
+        customer: { select: { businessName: true } },
+      },
+    });
+
+    if (!invoice) {
+      return res.status(404).json({
+        success: false,
+        error: { code: 'NOT_FOUND', message: 'Invoice record not found' },
+      });
+    }
+
+    await prisma.$transaction([
+      prisma.payment.deleteMany({ where: { invoiceId: id } }),
+      prisma.licenseRenewal.updateMany({ where: { invoiceId: id }, data: { invoiceId: null } }),
+      prisma.invoiceItem.deleteMany({ where: { invoiceId: id } }),
+      prisma.invoice.delete({ where: { id } }),
+    ]);
+
+    await prisma.auditLog.create({
+      data: {
+        userId: req.user?.id,
+        entityType: 'Invoice',
+        entityId: id,
+        action: 'DELETE',
+        oldValues: {
+          invoiceNumber: invoice.invoiceNumber,
+          customer: invoice.customer.businessName,
+          totalAmount: Number(invoice.totalAmount),
+        },
+      },
+    });
+
+    return res.json({
+      success: true,
+      message: `Invoice ${invoice.invoiceNumber} deleted successfully`,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+

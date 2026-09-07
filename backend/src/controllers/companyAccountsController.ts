@@ -34,6 +34,13 @@ const createAssetSchema = z.object({
   notes: z.string().optional(),
 });
 
+const createAccountSchema = z.object({
+  accountCode: z.string().min(1, 'Account code is required'),
+  accountName: z.string().min(1, 'Account name is required'),
+  accountType: z.enum(['ASSET', 'LIABILITY', 'EQUITY', 'REVENUE', 'EXPENSE']),
+  subCategory: z.string().optional(),
+});
+
 const journalLineSchema = z.object({
   accountId: z.string().uuid('Valid account is required'),
   debit: z.number().min(0).default(0),
@@ -732,3 +739,81 @@ export async function deleteAsset(req: AuthRequest, res: Response, next: NextFun
     next(err);
   }
 }
+
+/**
+ * POST /api/company-accounts/chart-of-accounts
+ * Create custom Account in Chart of Accounts
+ */
+export async function createAccount(req: AuthRequest, res: Response, next: NextFunction) {
+  try {
+    const parseResult = createAccountSchema.parse(req.body);
+    const existing = await prisma.account.findUnique({
+      where: { accountCode: parseResult.accountCode },
+    });
+    if (existing) {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'DUPLICATE_CODE', message: `Account code '${parseResult.accountCode}' already exists` },
+      });
+    }
+
+    const account = await prisma.account.create({
+      data: {
+        accountCode: parseResult.accountCode,
+        accountName: parseResult.accountName,
+        accountType: parseResult.accountType,
+        subCategory: parseResult.subCategory || 'General',
+        isSystem: false,
+      },
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: 'Account created successfully in Chart of Accounts',
+      data: account,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * DELETE /api/company-accounts/chart-of-accounts/:id
+ * Delete non-system Account from Chart of Accounts
+ */
+export async function deleteAccount(req: AuthRequest, res: Response, next: NextFunction) {
+  try {
+    const { id } = req.params;
+    const account = await prisma.account.findUnique({
+      where: { id },
+      include: { _count: { select: { journalLines: true } } },
+    });
+
+    if (!account) {
+      return res.status(404).json({
+        success: false,
+        error: { code: 'NOT_FOUND', message: 'Account not found' },
+      });
+    }
+
+    if (account.isSystem) {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'SYSTEM_ACCOUNT', message: 'System default accounts cannot be deleted' },
+      });
+    }
+
+    if (account._count.journalLines > 0) {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'ACCOUNT_IN_USE', message: 'Cannot delete account with existing transactions in journal' },
+      });
+    }
+
+    await prisma.account.delete({ where: { id } });
+    return res.json({ success: true, message: 'Account deleted successfully' });
+  } catch (err) {
+    next(err);
+  }
+}
+
