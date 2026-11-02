@@ -4,6 +4,13 @@ import bcrypt from 'bcryptjs';
 const prisma = new PrismaClient();
 
 async function main() {
+  // Safety guard: never seed a live database unless explicitly allowed.
+  // Prisma auto-runs this file on `prisma migrate dev` / `migrate reset`.
+  if (process.env.ALLOW_SEED !== 'true') {
+    console.log('⏭️  Seed skipped (set ALLOW_SEED=true to run the seeder).');
+    return;
+  }
+
   console.log('🌱 Starting database seed...');
 
   // 1. Seed Roles

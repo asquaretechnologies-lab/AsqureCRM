@@ -15,6 +15,11 @@
 			"key": "licenseKey",
 			"value": "AQPOS-9F8A-7B2C-4E1D-5A6B",
 			"type": "string"
+		},
+		{
+			"key": "email",
+			"value": "contact@apexretail.com",
+			"type": "string"
 		}
 	],
 	"item": [
@@ -86,7 +91,76 @@
 								}
 							],
 							"cookie": [],
-							"body": "{\n  \"success\": true,\n  \"message\": \"Mobile POS registered successfully and serial license key generated\",\n  \"data\": {\n    \"licenseKey\": \"AQPOS-9F8A-7B2C-4E1D-5A6B\",\n    \"licenseNumber\": \"LIC-2026-8812\",\n    \"licenseType\": \"SUBSCRIPTION\",\n    \"status\": \"ACTIVE\",\n    \"startDate\": \"2026-09-03T00:00:00.000Z\",\n    \"expiryDate\": \"2027-09-03T00:00:00.000Z\",\n    \"terminalCount\": 1,\n    \"customer\": {\n      \"id\": \"c1234567-89ab-cdef-0123-456789abcdef\",\n      \"customerCode\": \"CUST-MB-1042\",\n      \"businessName\": \"Apex Supermarket Pvt Ltd\",\n      \"displayName\": \"Apex Supermarket\",\n      \"phone\": \"+91 9876543210\",\n      \"email\": \"contact@apexretail.com\"\n    },\n    \"outlet\": {\n      \"id\": \"o1234567-89ab-cdef-0123-456789abcdef\",\n      \"outletCode\": \"OUT-MB-3012\",\n      \"outletName\": \"Indiranagar Branch\"\n    },\n    \"installation\": {\n      \"id\": \"i1234567-89ab-cdef-0123-456789abcdef\",\n      \"installationNumber\": \"INST-MB-9014\"\n    },\n    \"product\": {\n      \"id\": \"p1234567-89ab-cdef-0123-456789abcdef\",\n      \"name\": \"Asqure Mobile POS\",\n      \"productCode\": \"PROD-MBPOS\"\n    }\n  }\n}"
+							"body": "{\n  \"success\": true,\n  \"message\": \"Mobile POS registered successfully and serial license key generated\",\n  \"data\": {\n    \"registered\": true,\n    \"customer\": {\n      \"id\": \"c1234567-89ab-cdef-0123-456789abcdef\",\n      \"customerCode\": \"CUST-MB-1042\",\n      \"businessName\": \"Apex Supermarket Pvt Ltd\",\n      \"displayName\": \"Apex Supermarket\",\n      \"phone\": \"+91 9876543210\",\n      \"email\": \"contact@apexretail.com\",\n      \"taxNumber\": \"29ABCDE1234F1ZH\",\n      \"city\": \"Bengaluru\",\n      \"state\": \"Karnataka\",\n      \"country\": \"India\",\n      \"status\": \"ACTIVE\"\n    },\n    \"outlets\": [\n      {\n        \"id\": \"o1234567-89ab-cdef-0123-456789abcdef\",\n        \"outletCode\": \"OUT-MB-3012\",\n        \"outletName\": \"Indiranagar Branch\",\n        \"status\": \"ACTIVE\",\n        \"installation\": { \"id\": \"i1234567-89ab-cdef-0123-456789abcdef\", \"installationNumber\": \"INST-MB-9014\", \"terminalCount\": 1, \"status\": \"ACTIVATED\" },\n        \"product\": { \"id\": \"p1234567-89ab-cdef-0123-456789abcdef\", \"name\": \"Asqure Mobile POS\", \"productCode\": \"PROD-MBPOS\", \"version\": \"v1.0.0\" },\n        \"license\": { \"licenseKey\": \"AQPOS-9F8A-7B2C-4E1D-5A6B\", \"licenseNumber\": \"LIC-2026-8812\", \"licenseType\": \"SUBSCRIPTION\", \"status\": \"ACTIVE\", \"startDate\": \"2026-11-02T00:00:00.000Z\", \"expiryDate\": \"2027-11-02T00:00:00.000Z\", \"terminalCount\": 1, \"daysRemaining\": 365, \"isExpired\": false }\n      }\n    ]\n  }\n}"
+						},
+						{
+							"name": "Email Already Registered - OTP Sent",
+							"originalRequest": {
+								"method": "POST",
+								"header": [{ "key": "Content-Type", "value": "application/json" }],
+								"body": { "mode": "raw", "raw": "{\n  \"businessName\": \"Apex Supermarket Pvt Ltd\",\n  \"email\": \"contact@apexretail.com\"\n}" },
+								"url": { "raw": "{{baseUrl}}/api/mobile-pos/register", "host": ["{{baseUrl}}"], "path": ["api", "mobile-pos", "register"] }
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Email already registered. OTP sent to the registered email.\",\n  \"data\": {\n    \"registered\": true,\n    \"otpSent\": true,\n    \"maskedEmail\": \"co*****@apexretail.com\",\n    \"otpExpiresInSeconds\": 600\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Check Email (sends OTP if registered)",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json", "type": "text" }],
+						"body": { "mode": "raw", "raw": "{\n  \"email\": \"{{email}}\"\n}" },
+						"url": { "raw": "{{baseUrl}}/api/mobile-pos/check-email", "host": ["{{baseUrl}}"], "path": ["api", "mobile-pos", "check-email"] },
+						"description": "Step 1 of app launch. Returns registered=false (show registration form) or registered=true and emails a 6-digit OTP (valid 10 min, resend allowed after 60s). Without SMTP configured, the OTP is printed in the backend log."
+					},
+					"response": [
+						{
+							"name": "Not Registered",
+							"originalRequest": { "method": "POST", "header": [], "url": { "raw": "{{baseUrl}}/api/mobile-pos/check-email", "host": ["{{baseUrl}}"], "path": ["api", "mobile-pos", "check-email"] } },
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Email not registered. Proceed with registration.\",\n  \"data\": { \"registered\": false }\n}"
+						},
+						{
+							"name": "Registered - OTP Sent",
+							"originalRequest": { "method": "POST", "header": [], "url": { "raw": "{{baseUrl}}/api/mobile-pos/check-email", "host": ["{{baseUrl}}"], "path": ["api", "mobile-pos", "check-email"] } },
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Email already registered. OTP sent to the registered email.\",\n  \"data\": {\n    \"registered\": true,\n    \"otpSent\": true,\n    \"maskedEmail\": \"co*****@apexretail.com\",\n    \"otpExpiresInSeconds\": 600\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Verify OTP & Fetch Details",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json", "type": "text" }],
+						"body": { "mode": "raw", "raw": "{\n  \"email\": \"{{email}}\",\n  \"otp\": \"123456\"\n}" },
+						"url": { "raw": "{{baseUrl}}/api/mobile-pos/verify-otp", "host": ["{{baseUrl}}"], "path": ["api", "mobile-pos", "verify-otp"] },
+						"description": "Step 2 for registered users. Verifies the OTP (max 5 attempts) and returns customer, outlets, installation and license details (same shape as /register success). Errors: 401 INVALID_OTP, 429 OTP_ATTEMPTS_EXCEEDED."
+					},
+					"response": [
+						{
+							"name": "Invalid OTP",
+							"originalRequest": { "method": "POST", "header": [], "url": { "raw": "{{baseUrl}}/api/mobile-pos/verify-otp", "host": ["{{baseUrl}}"], "path": ["api", "mobile-pos", "verify-otp"] } },
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+							"cookie": [],
+							"body": "{\n  \"success\": false,\n  \"error\": { \"code\": \"INVALID_OTP\", \"message\": \"Invalid or expired OTP\" }\n}"
 						}
 					]
 				}

@@ -588,3 +588,17 @@ model CompanyAsset {
 
   @@map("company_assets")
 }
+
+// One-time passwords for Mobile POS login (existing registered emails)
+model MobileOtp {
+  id        String   @id @default(uuid())
+  email     String   @db.VarChar(255)
+  otpHash   String   @map("otp_hash")
+  expiresAt DateTime @map("expires_at")
+  attempts  Int      @default(0)
+  consumed  Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([email])
+  @@map("mobile_otps")
+}
